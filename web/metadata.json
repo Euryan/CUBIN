@@ -1,0 +1,6 @@
+{
+  "name": "EcoTrash",
+  "description": "Smart Waste Management platform with a modern, futuristic, eco-friendly, and fintech-style UI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

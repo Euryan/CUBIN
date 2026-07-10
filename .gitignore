@@ -1,0 +1,39 @@
+.env.local
+.env
+node_modules/
+dist/
+*.log
+.DS_Store
+.vscode/settings.json
+*.swp
+*.swo
+
+# Database
+*.db
+*.sqlite
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Environment
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+
+# Testing
+.nyc_output/
+coverage/
+
+# Temporary
+temp/
+tmp/

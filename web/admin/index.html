@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EcoTrash Admin | Monitoring Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/admin.css">
+  </head>
+  <body>
+    <div id="admin-app">
+
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="sidebar-logo">
+            <div class="logo-icon"><i data-lucide="leaf"></i></div>
+            <div>
+              <div class="logo-title">EcoTrash</div>
+              <div class="logo-sub">ADMIN PANEL</div>
+            </div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <button class="nav-item active" data-view="dashboard" onclick="switchView('dashboard')">
+            <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+          </button>
+          <button class="nav-item" data-view="detections" onclick="switchView('detections')">
+            <i data-lucide="scan-line"></i><span>Log Deteksi</span>
+          </button>
+          <button class="nav-item" data-view="users" onclick="switchView('users')">
+            <i data-lucide="users"></i><span>Pengguna</span>
+          </button>
+          <button class="nav-item" data-view="categories" onclick="switchView('categories')">
+            <i data-lucide="tag"></i><span>Kategori</span>
+          </button>
+          <button class="nav-item" data-view="hardware" onclick="switchView('hardware')">
+            <i data-lucide="cpu"></i><span>Status Hardware</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="hw-status-chip" id="hw-status-chip">
+            <span class="hw-dot" id="hw-dot"></span>
+            <span id="hw-status-text">Memeriksa...</span>
+          </div>
+          <a href="http://localhost:3000" target="_blank" class="nav-item" style="margin-top:8px">
+            <i data-lucide="external-link"></i><span>Buka User App</span>
+          </a>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+          <div class="topbar-left">
+            <h1 class="page-title" id="page-title">Dashboard</h1>
+            <div class="last-update">Update: <span id="last-update-time">-</span></div>
+          </div>
+          <div class="topbar-right">
+            <div class="auto-refresh-toggle">
+              <span>Auto Refresh</span>
+              <label class="toggle">
+                <input type="checkbox" id="auto-refresh-toggle" checked onchange="toggleAutoRefresh(this.checked)">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <button class="btn-refresh" onclick="fetchAll()" id="refresh-btn">
+              <i data-lucide="refresh-cw"></i> Refresh
+            </button>
+          </div>
+        </header>
+
+        <!-- ===== VIEW: DASHBOARD ===== -->
+        <div id="view-dashboard" class="view active">
+
+          <!-- Stats Row -->
+          <div class="stats-grid">
+            <div class="stat-card accent-green">
+              <div class="stat-icon"><i data-lucide="package"></i></div>
+              <div class="stat-info">
+                <div class="stat-label">Total Deteksi</div>
+                <div class="stat-value" id="s-total-entries">0</div>
+              </div>
+            </div>
+            <div class="stat-card accent-blue">
+              <div class="stat-icon"><i data-lucide="weight"></i></div>
+              <div class="stat-info">
+                <div class="stat-label">Total Berat</div>
+                <div class="stat-value" id="s-total-weight">0 kg</div>
+              </div>
+            </div>
+            <div class="stat-card accent-amber">
+              <div class="stat-icon"><i data-lucide="award"></i></div>
+              <div class="stat-info">
+                <div class="stat-label">Total Poin</div>
+                <div class="stat-value" id="s-total-points">0</div>
+              </div>
+            </div>
+            <div class="stat-card accent-purple">
+              <div class="stat-icon"><i data-lucide="users"></i></div>
+              <div class="stat-info">
+                <div class="stat-label">Total User</div>
+                <div class="stat-value" id="s-total-users">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart + Category Breakdown -->
+          <div class="grid-2col">
+            <!-- Category Breakdown Chart -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i data-lucide="pie-chart"></i> Distribusi Kategori Sampah</h3>
+              </div>
+              <div class="category-bars" id="category-bars">
+                <div class="empty-state">Belum ada data</div>
+              </div>
+            </div>
+
+            <!-- Live Feed -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i data-lucide="activity"></i> Deteksi Terbaru</h3>
+                <div class="live-badge"><span class="pulse-dot"></span>LIVE</div>
+              </div>
+              <div class="live-feed" id="live-feed">
+                <div class="empty-state">Menunggu deteksi hardware...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== VIEW: DETECTIONS ===== -->
+        <div id="view-detections" class="view hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3><i data-lucide="scan-line"></i> Semua Log Deteksi Sampah</h3>
+              <div class="card-actions">
+                <input type="text" id="detect-search" placeholder="Cari kategori / user..." class="search-input" oninput="filterDetections()">
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table" id="detections-table">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Waktu</th><th>User</th><th>Kategori</th>
+                    <th>Berat</th><th>Poin</th><th>Confidence AI</th>
+                  </tr>
+                </thead>
+                <tbody id="detections-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== VIEW: USERS ===== -->
+        <div id="view-users" class="view hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3><i data-lucide="users"></i> Daftar Pengguna</h3>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr><th>ID</th><th>Nama</th><th>RFID UID</th><th>Total Poin</th><th>Bergabung</th></tr>
+                </thead>
+                <tbody id="users-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== VIEW: CATEGORIES ===== -->
+        <div id="view-categories" class="view hidden">
+          <div class="card">
+            <div class="card-header">
+              <h3><i data-lucide="tag"></i> Manajemen Kategori Sampah</h3>
+              <button class="btn-primary" onclick="openAddCategory()">
+                <i data-lucide="plus"></i> Tambah Kategori
+              </button>
+            </div>
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr><th>ID</th><th>Nama</th><th>Poin/kg</th><th>Deskripsi</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="categories-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== VIEW: HARDWARE ===== -->
+        <div id="view-hardware" class="view hidden">
+          <div class="grid-2col">
+            <div class="card">
+              <div class="card-header">
+                <h3><i data-lucide="cpu"></i> Status Koneksi Hardware</h3>
+              </div>
+              <div class="hw-info-list" id="hw-info-list">
+                <div class="hw-item">
+                  <span class="hw-item-label">Backend API</span>
+                  <span class="hw-item-value" id="hw-api-status">Memeriksa...</span>
+                </div>
+                <div class="hw-item">
+                  <span class="hw-item-label">cobaconnect.py</span>
+                  <span class="hw-item-value" id="hw-connect-status">Tidak diketahui</span>
+                </div>
+                <div class="hw-item">
+                  <span class="hw-item-label">Deteksi terakhir</span>
+                  <span class="hw-item-value" id="hw-last-detect">-</span>
+                </div>
+                <div class="hw-item">
+                  <span class="hw-item-label">Hardware ID</span>
+                  <span class="hw-item-value mono">CUBIN-UNIT-01</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <h3><i data-lucide="send"></i> Test Deteksi Manual</h3>
+              </div>
+              <div class="hw-test-form">
+                <p class="form-hint">Kirim deteksi test ke database tanpa hardware fisik.</p>
+                <div class="form-group">
+                  <label>Kategori</label>
+                  <select id="test-category" class="form-select">
+                    <option value="Plastik">Plastik (class 1)</option>
+                    <option value="Kaleng">Kaleng (class 2)</option>
+                    <option value="Kertas">Kertas (class 3)</option>
+                    <option value="Kaca">Kaca (class 4)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Berat (kg)</label>
+                  <input type="number" id="test-weight" value="0.3" step="0.1" min="0.1" class="form-input">
+                </div>
+                <div class="form-group">
+                  <label>RFID User (opsional)</label>
+                  <input type="text" id="test-rfid" placeholder="Kosongkan untuk hardware_system" class="form-input">
+                </div>
+                <button class="btn-primary" onclick="sendTestDetection()" id="test-btn">
+                  <i data-lucide="zap"></i> Kirim Test Deteksi
+                </button>
+                <div id="test-result" class="test-result hidden"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- Modal Add/Edit Category -->
+    <div id="category-modal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 id="modal-title">Tambah Kategori</h3>
+          <button onclick="closeModal()" class="modal-close"><i data-lucide="x"></i></button>
+        </div>
+        <form id="category-form" onsubmit="submitCategory(event)">
+          <input type="hidden" id="cat-edit-id">
+          <div class="form-group">
+            <label>Nama Kategori</label>
+            <input type="text" id="cat-name" class="form-input" placeholder="Contoh: Plastik" required>
+          </div>
+          <div class="form-group">
+            <label>Poin per kg</label>
+            <input type="number" id="cat-price" class="form-input" placeholder="100" min="1" required>
+          </div>
+          <div class="form-group">
+            <label>Deskripsi</label>
+            <input type="text" id="cat-desc" class="form-input" placeholder="Deskripsi kategori...">
+          </div>
+          <div class="modal-actions">
+            <button type="button" onclick="closeModal()" class="btn-secondary">Batal</button>
+            <button type="submit" class="btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/src/admin.js" type="module"></script>
+  </body>
+</html>

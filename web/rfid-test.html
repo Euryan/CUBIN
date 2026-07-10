@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RFID Test | CUBIN</title>
+  <link href="./src/index.css" rel="stylesheet" />
+</head>
+<body class="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+
+  <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-emerald-100 p-6 space-y-5">
+    <div class="text-center space-y-2">
+      <img src="/Logo.png" class="w-28 mx-auto" />
+      <h1 class="text-xl font-extrabold text-slate-800">RFID Reader Test</h1>
+      <p class="text-xs text-slate-500">Tempelkan kartu RFID ke alat CUBIN</p>
+    </div>
+
+    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 text-center">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">UID Terakhir</p>
+      <h2 id="rfid-uid" class="text-2xl font-black text-emerald-700 font-mono mt-2">
+        Menunggu...
+      </h2>
+      <p id="rfid-time" class="text-xs text-slate-400 mt-2">Belum ada data</p>
+    </div>
+
+    <div class="space-y-2">
+      <h3 class="text-sm font-bold text-slate-700">Riwayat Scan</h3>
+      <div id="rfid-logs" class="space-y-2 max-h-64 overflow-y-auto">
+        <p class="text-xs text-slate-400 text-center">Belum ada riwayat</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/rfid-test.js"></script>
+</body>
+</html>
